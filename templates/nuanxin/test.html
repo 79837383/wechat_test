@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>微信接口测试</title>	
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+	</head>
+
+<body ontouchstart="">
+	<div class="wxapi_container">
+		<div class="lbox_close wxapi_form">
+			<h3 id="nuanxin_image">图片上传测试</h3>
+			<span class="desc">拍照或从手机相册中选图接口</span>
+			<button class="btn btn_primary" id="nuanxin_chooseImage">选择图片</button>
+			
+			<div id="img_show"></div>
+			
+			<span class="desc">demo图片上传测试</span>
+			<button class="btn btn_primary" id="nuanxin_uploadImage">上传</button>
+			<button class="btn btn_primary" id="nuanxin_submit">显示media_id</button>
+			
+			<div id="imgId_show"></div>
+        
+		</div>
+	</div>
+		
+</body>	
+
+<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script>
+	wx.config({
+		debug:true,
+		appId:'{{appId}}',
+		timestamp:{{timestamp}},
+		nonceStr:'{{nonceStr}}',
+		signature:'{{signature}}',
+		jsApiList:[
+		'checkJsApi',
+        'onMenuShareTimeline',
+        'onMenuShareAppMessage',
+        'onMenuShareQQ',
+        'onMenuShareWeibo',
+        'hideMenuItems',
+        'showMenuItems',
+        'hideAllNonBaseMenuItem',
+        'showAllNonBaseMenuItem',
+        'translateVoice',
+        'startRecord',
+        'stopRecord',
+        'onRecordEnd',
+        'playVoice',
+        'pauseVoice',
+        'stopVoice',
+        'uploadVoice',
+        'downloadVoice',
+        'chooseImage',
+        'previewImage',
+        'uploadImage',
+        'downloadImage',
+        'getNetworkType',
+        'openLocation',
+        'getLocation',
+        'hideOptionMenu',
+        'showOptionMenu',
+        'closeWindow',
+        'scanQRCode',
+        'chooseWXPay',
+        'openProductSpecificView',
+        'addCard',
+        'chooseCard',
+        'openCard'
+		]
+		})	
+</script>
+<script>
+	wx.ready(function(){
+		var nuanxinImages = {localId:[],serverId:[]};
+		var media_id_content='';
+		document.querySelector('#nuanxin_chooseImage').onclick=function(){
+			wx.chooseImage({
+				success:function(res){
+					nuanxinImages.localId = res.localIds;//返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
+					var html_content = "",i = 0;
+					alert('已选择 ' + res.localIds.length + ' 张图片');
+					while(i<res.localIds.length)
+					{
+						html_content = html_content + '<img src="' + nuanxinImages.localId[i] + '" width="100%" height="228px"/>';
+						i++;
+					}
+					document.getElementById("img_show").innerHTML=html_content;
+				}
+			});
+		};
+		
+		document.querySelector('#nuanxin_uploadImage').onclick=function(){
+			if(nuanxinImages.localId.length == 0){
+				alert('请选择图片');
+				return;
+			}
+			var i = 0,length = nuanxinImages.localId.length;
+			var n = 0;
+			nuanxinImages.serverId = [];
+			function upload(){
+				wx.uploadImage({
+					localId:nuanxinImages.localId[i],
+					success:function(res){
+						i++;
+						alert('已上传：' + i + '/' + length);
+            nuanxinImages.serverId.push(res.serverId);
+            //media_id_content = media_id_content + '<img src="' + res.serverId + '" width="100%" height="228px"/>';
+            media_id_content = media_id_content + '<p>'+i+':'+res.serverId+'</p>';
+            if (i < length) {
+              upload();
+            }
+					},
+					fail: function (res) {
+          	alert(JSON.stringify(res));
+          }
+				});
+			}
+			upload();
+		};
+		document.querySelector('#nuanxin_submit').onclick = function () {
+			alert("11111");
+    document.getElementById("imgId_show").innerHTML = media_id_content;
+  	};
+	});//)	
+	
+	wx.error(function (res) {
+  alert(res.errMsg);
+});
+</script>
+
+</html>
